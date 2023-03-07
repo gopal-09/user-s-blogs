@@ -18,7 +18,7 @@ const getAllBlogs=async(req,res)=>{
     res.status(200).json({blogs});
 }
 const addBlog=async(req,res)=>{
-    const{title,description,image,user}=req.body;
+    const{title,description,user}=req.body;
     let existingUser;
     try{
         existingUser=await User.findById(user);
@@ -32,7 +32,7 @@ const addBlog=async(req,res)=>{
     }
     const blog= await Blog.create({title:req.body.title
         ,description:req.body.description,
-        image:req.body.image,user:req.body.user});
+        user:req.body.user});
 
     existingUser.blogs.push(blog._id);
     await existingUser.save();

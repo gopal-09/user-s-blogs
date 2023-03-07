@@ -1,6 +1,8 @@
 const { response } = require('express')
 const User=require('../models/user')
+const image=require('../models/image')
  const bcrypt =  require('bcryptjs')
+ const multer= require('multer')
  const getAllUser = async (req, res, next) => {
     let users;
     try {
@@ -12,6 +14,15 @@ catch (error) {
 }
  const signup= async (req,res,next) => {
     const{name,email,password}=req.body;
+    // const Storage = multer.diskStorage({
+    //     destination:"uploads",
+    //     filename:(req,file,cb)=>{
+    //     cb(null,file.originalname)
+    //     },
+    //     })
+    //     const upload=multer({
+    //         storage:Storage
+    //     }).single('testImage')
      let existingUser;
      try {
          existingUser = await User.findOne({email}) 
@@ -26,6 +37,10 @@ catch (error) {
          const user=new User({
                 name,
                 email,
+                // image:{
+                //   data:req.file.filename,
+                //    contentType:'image/png'
+                // },
                 password:hashedPassword,
                 blogs:[]
          }) ;
@@ -38,6 +53,34 @@ catch (error) {
          }
           return res.status(200).json({user: user})
  
+}
+//storage
+const Storage = multer.diskStorage({
+        destination:"uploads",
+        filename:(req,file,cb)=>{
+        cb(null,file.originalname)
+        },
+        })
+        const upload=multer({
+            storage:Storage
+        }).single('testImage')
+const upimage=async(req,res)=>{
+    upload(req,res,(err)=>{
+        if(err){
+            console.log(err);
+        }
+        const newImage=new image({
+           name:req.body.name,
+           image:{
+            data:req.file.filename,
+            contentType:'image/png'
+           } 
+        })
+        newImage.save()
+        res.send("uploaad succcess")
+    })
+    
+
 }
 const login= async (req, res) => {
     
@@ -60,4 +103,4 @@ const login= async (req, res) => {
         return res.status(200).json({message:"login success"})
 }
 
-module.exports = {getAllUser,signup,login};
+module.exports = {getAllUser,signup,login,upimage};
