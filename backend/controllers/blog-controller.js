@@ -87,13 +87,17 @@ const deleteBlog=async(req,res)=>{
     const id=req.params.id
    // let blog;
     let blog=await Blog.findById(id)
-    if(!blog)
-    return res.json({message:"no blog found"})
-    else{
+    //console.log(blog)
+    // if(!blog)
+    // return res.json({message:"no blog found"})
+    
     try{
-       let k= blog.user.blogs.indexOf(id)
-        await blog.user.blogs.slice(k)
-        await blog.user.save()
+       //let k= blog.user.blogs.indexOf(id)
+        await user.updateOne(
+            { $pull: { blogs: { $in: [ id ] } } }
+           
+        )
+        // await blog.user.save()
         await Blog.findByIdAndDelete(id)
     }
     catch(err){
@@ -102,29 +106,14 @@ const deleteBlog=async(req,res)=>{
     }
     if(!blog){
         res.json({message:"deleted successfully"})
-    }
+    
 }
     // else{
     // res.json({message:""})
     // }
 
 }
-// const getByUserId=async (req,res)=>{
-//     const userId=req.params.id;
-//     let userBlogs;
-//     try{
-//         userBlogs=await User.find(userId).populate("Blog")
-//     }
-//     catch(err){
-//         return console.error(err);
-//     }
-//     if(!userBlogs){
-//         return res.status(404).json({message:'No blogs found'});
-//     }
-//     else{
-//     res.status(200).json({userBlogs});
-//     }
-// }
+
 const getBlogsbyUserID=async (req,res)=>{
     const userId=req.params.id;
     let userBlogs;
