@@ -25,14 +25,15 @@ catch (error) {
     //     }).single('testImage')
      let existingUser;
      try {
-         existingUser = await User.findOne({email}) 
+         existingUser = await User.findOne({name}) 
          }
          catch (error) {
              console.log(error);
          } 
          if(existingUser) {
-              response.json({message:'user exist'})  
+              res.json({message:'user exist'})  
          }
+         else{
          const hashedPassword=bcrypt.hashSync(password)
          const user=new User({
                 name,
@@ -52,39 +53,38 @@ catch (error) {
              console.log(error);
          }
           return res.status(200).json({user: user})
+        }
  
 }
 //storage
-const Storage = multer.diskStorage({
-        destination:"uploads",
-        filename:(req,file,cb)=>{
-        cb(null,file.originalname)
-        },
-        })
-        const upload=multer({
-            storage:Storage
-        }).single('testImage')
-const upimage=async(req,res)=>{
-    upload(req,res,(err)=>{
-        if(err){
-            console.log(err);
-        }
-        const newImage=new image({
-           name:req.body.name,
-           image:{
-            data:req.file.filename,
-            contentType:'image/png'
-           } 
-        })
-        newImage.save()
-        res.send("uploaad succcess")
-    })
+// const Storage = multer.diskStorage({
+//         destination:"uploads",
+//         filename:(req,file,cb)=>{
+//         cb(null,file.originalname)
+//         },
+//         })
+//         const upload=multer({
+//             storage:Storage
+//         }).single('testImage')
+// const upimage=async(req,res)=>{
+//     upload(req,res,(err)=>{
+//         if(err){
+//             console.log(err);
+//         }
+//         const newImage=new image({
+//            name:req.body.name,
+//            image:{
+//             data:req.file.filename,
+//             contentType:'image/png'
+//            } 
+//         })
+//         newImage.save()
+//         .then(()=>res.send("uploaded successfully")).catch(err=>res.send(err))
+//     )}
     
-
-}
-const login= async (req, res) => {
-    
-        const{email,password}=req.body;
+        
+      login= async (req, res) => {
+    const{email,password}=req.body;
         let user;
         try {
             user = await User.findOne({email})
@@ -95,12 +95,15 @@ const login= async (req, res) => {
         if(!user) {
            return res.json({message: "User not found"})
         }
+        else{
         const isPasswordCorrect=bcrypt.compareSync(password, user.password)
         if(!isPasswordCorrect)
         {
                 return res.status(200).json({message:"Incorrect password"})
         }
         return res.status(200).json({message:"login success"})
+    }
 }
 
-module.exports = {getAllUser,signup,login,upimage};
+
+module.exports = {getAllUser,signup,login}

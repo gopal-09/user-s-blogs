@@ -1,8 +1,8 @@
 const { default: mongoose } = require('mongoose');
 // const blog = require('../models/blog');
 const Blog=require('../models/blog');
-//const user = require('../models/user');
-const ObjectId=mongoose.Types.ObjectId;
+const user = require('../models/user');
+//const ObjectId=mongoose.Types.ObjectId;
 
 const User=require('../models/user')
 const getAllBlogs=async(req,res)=>{
@@ -15,14 +15,15 @@ const getAllBlogs=async(req,res)=>{
     if(!blogs){
         return res.status(404).json({message:'No blogs found'});
     }
-    res.status(200).json({blogs});
+    else{
+    res.status(200).json({blogs});}
 }
 const addBlog=async(req,res)=>{
     const{title,description,user}=req.body;
     let existingUser;
     try{
         existingUser=await User.findById(user);
-        console.log("d")
+        //console.log("d")
     }
     catch(err){
         console.log(err)
@@ -30,6 +31,7 @@ const addBlog=async(req,res)=>{
     if(!existingUser){
         res.status(404).json({message:'No users found'});
     }
+    else{
     const blog= await Blog.create({title:req.body.title
         ,description:req.body.description,
         user:req.body.user});
@@ -40,12 +42,14 @@ const addBlog=async(req,res)=>{
         message: 'Blog created successfully',
         blog: blog
     })
+}
        
 }
 const updateBlog= async (req,res)=>{
     const blogId=req.params.id;
+    let blog;
     try{
-    const blog= await Blog.findByIdUpdate(blogId,{
+    blog= await Blog.findByIdAndUpdate(blogId,{
         title:req.body.title,
         description:req.body.description,
     })
@@ -57,9 +61,10 @@ const updateBlog= async (req,res)=>{
     }
     if(!blog)
     {
-        res.json({message:"update blog"})
+        res.json({message:"blog not found"})
     }
-    return res.json({blog})
+    else{
+    return res.json({blog})}
 }
 const getById= async (req,res)=>
 {
@@ -75,45 +80,56 @@ const getById= async (req,res)=>
     {
        res.status(404).json({message:"no blog found"}) 
     }
-    res.json({blog})
+    else{
+    res.json({blog})}
 }
 const deleteBlog=async(req,res)=>{
     const id=req.params.id
-    let blog;
+   // let blog;
+    let blog=await Blog.findById(id)
+    if(!blog)
+    return res.json({message:"no blog found"})
+    else{
     try{
-        blog =await Blog.findByIdAndRemove(id).populate('User')
-        await blog.user.blogs.pull(blog._id)
+       let k= blog.user.blogs.indexOf(id)
+        await blog.user.blogs.slice(k)
         await blog.user.save()
+        await Blog.findByIdAndDelete(id)
     }
     catch(err){
-        consolelog(err)
+        console.log(err)
 
     }
     if(!blog){
-        res.json({message:"no blog found"})
+        res.json({message:"deleted successfully"})
     }
-    res.json({message:"delete successfully"})
+}
+    // else{
+    // res.json({message:""})
+    // }
 
 }
-const getByUserId=async (req,res)=>{
-    const userId=req.params.id;
-    let userBlogs;
-    try{
-        userBlogs=await User.find(userId).populate("Blog")
-    }
-    catch(err){
-        return console.error(err);
-    }
-    if(!userBlogs){
-        return res.status(404).json({message:'No blogs found'});
-    }
-    res.status(200).json({userBlogs});
-}
+// const getByUserId=async (req,res)=>{
+//     const userId=req.params.id;
+//     let userBlogs;
+//     try{
+//         userBlogs=await User.find(userId).populate("Blog")
+//     }
+//     catch(err){
+//         return console.error(err);
+//     }
+//     if(!userBlogs){
+//         return res.status(404).json({message:'No blogs found'});
+//     }
+//     else{
+//     res.status(200).json({userBlogs});
+//     }
+// }
 const getBlogsbyUserID=async (req,res)=>{
     const userId=req.params.id;
     let userBlogs;
     try{
-        userBlogs=await Blog.find({user:userId})
+        userBlogs=await user.findById(userId)
         // userBlogs=await Blog.find(ObjectId(userId))
     }
     catch(err){
@@ -122,6 +138,7 @@ const getBlogsbyUserID=async (req,res)=>{
     if(!userBlogs){
         return res.status(404).json({message:'No blogs found'});
     }
-    res.status(200).json({userBlogs});
+    else{
+    res.status(200).json(userBlogs.blogs);}
 }
-module.exports = {getAllBlogs,addBlog,updateBlog,getById,deleteBlog,getByUserId,getBlogsbyUserID}
+module.exports = {getAllBlogs,addBlog,updateBlog,getById,deleteBlog,getBlogsbyUserID}
