@@ -2,6 +2,7 @@ const { response } = require('express')
 const User=require('../models/user')
 const image=require('../models/image')
  const bcrypt =  require('bcryptjs')
+ const { check, validationResult } = require("express-validator");
  const multer= require('multer')
  const getAllUser = async (req, res, next) => {
     let users;
@@ -14,15 +15,10 @@ catch (error) {
 }
  const signup= async (req,res,next) => {
     const{name,email,password}=req.body;
-    // const Storage = multer.diskStorage({
-    //     destination:"uploads",
-    //     filename:(req,file,cb)=>{
-    //     cb(null,file.originalname)
-    //     },
-    //     })
-    //     const upload=multer({
-    //         storage:Storage
-    //     }).single('testImage')
+    const errors = validationResult(req);
+    if(!errors.isEmpty())
+    res.send("validation error: " + errors)
+    else{
      let existingUser;
      try {
          existingUser = await User.findOne({name}) 
@@ -54,7 +50,7 @@ catch (error) {
          }
           return res.status(200).json({user: user})
         }
- 
+    }
 }
 //storage
 // const Storage = multer.diskStorage({
@@ -88,6 +84,7 @@ catch (error) {
         let user;
         try {
             user = await User.findOne({email})
+            //let isMatch = await bcrypt.compare(req.body.password,user.password);
         }
         catch (error) {
             console.log(error);
