@@ -1,6 +1,7 @@
 const { response } = require('express')
 const User=require('../models/user')
-const image=require('../models/image')
+const JWT = require("jsonwebtoken")
+//const image=require('../models/image')
  const bcrypt =  require('bcryptjs')
  const { check, validationResult } = require("express-validator");
  const multer= require('multer')
@@ -27,6 +28,7 @@ catch (error) {
              console.log(error);
          } 
          if(existingUser) {
+            //console.log(existingUser)
               res.json({message:'user exist'})  
          }
          else{
@@ -34,10 +36,6 @@ catch (error) {
          const user=new User({
                 name,
                 email,
-                // image:{
-                //   data:req.file.filename,
-                //    contentType:'image/png'
-                // },
                 password:hashedPassword,
                 blogs:[]
          }) ;
@@ -48,38 +46,15 @@ catch (error) {
          catch (error) {
              console.log(error);
          }
+         const token =JWT.sign({email}, "nfb32iur32ibfqfvi3vf932bg932g", {expiresIn: 360000});
+         console.log(token);
           return res.status(200).json({user: user})
         }
     }
 }
-//storage
-// const Storage = multer.diskStorage({
-//         destination:"uploads",
-//         filename:(req,file,cb)=>{
-//         cb(null,file.originalname)
-//         },
-//         })
-//         const upload=multer({
-//             storage:Storage
-//         }).single('testImage')
-// const upimage=async(req,res)=>{
-//     upload(req,res,(err)=>{
-//         if(err){
-//             console.log(err);
-//         }
-//         const newImage=new image({
-//            name:req.body.name,
-//            image:{
-//             data:req.file.filename,
-//             contentType:'image/png'
-//            } 
-//         })
-//         newImage.save()
-//         .then(()=>res.send("uploaded successfully")).catch(err=>res.send(err))
-//     )}
+
     
-        
-      login= async (req, res) => {
+    login= async (req, res) => {
     const{email,password}=req.body;
         let user;
         try {
@@ -98,7 +73,10 @@ catch (error) {
         {
                 return res.status(200).json({message:"Incorrect password"})
         }
-        return res.status(200).json({message:"login success"})
+        else{
+            const token =JWT.sign({email}, "nfb32iur32ibfqfvi3vf932bg932g", {expiresIn: 360000});
+            console.log(token);
+        return res.status(200).json({message:"login success"})}
     }
 }
 

@@ -73,7 +73,7 @@ const getById= async (req,res)=>
     try{
       blog=await Blog.find(id)
     }
-    catch{
+    catch(err){
         return console.log(err);
     }
     if(!blog)
